@@ -6,7 +6,8 @@ Created on Mon Oct 23 09:45:38 2023
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+import mathplotlib.pyplot as plt
+
 
 def plotPrint(w):
     plt.plot(Class1[:,0], Class1[:,1], '*')
