@@ -33,8 +33,6 @@ def knn():
             biggest_distance: int = list_of_points[-1].distance
             if biggest_distance > point.distance:
                 list_of_points[-1] = point
-    count_blue: int = sum(point.color == "blue" for point in list_of_points)
-    count_red: int = sum(point.color == "red" for point in list_of_points)
     for point in list_of_points:
         if point in array_points_blue:
             plt.scatter(point.x, point.y, color="blue")
@@ -42,6 +40,9 @@ def knn():
             plt.scatter(point.x, point.y, color="red")
         else:
             print("point isn't red or blue")
+    count_blue: int = sum(point.color == "blue" for point in list_of_points)
+    count_red: int = sum(point.color == "red" for point in list_of_points)
+    # Scattering the new point in another color to enable User to identify it
     if count_red > count_blue:
         print("The new point is red")
         plt.scatter(new_point.x, new_point.y, color="pink")
