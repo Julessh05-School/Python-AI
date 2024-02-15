@@ -1,12 +1,13 @@
 """ Codeinfo """
-import random
-
 # Author: Julian Schumacher
 # Date: 22.01.2024
 # Version: 1.0
 # Flappy Bird mit KI
 
+
 ''' Import Bibliotheken '''
+
+import random
 import sys
 
 import pygame as pg
@@ -17,16 +18,19 @@ pg.init()
 width = 1000
 height = 700
 screen = pg.display.set_mode((width, height))
-FPS = 60
+FPS = 30
 FPSCLOCK = pg.time.Clock()
 
 # Bird Position
 birdPosX = width / 5
 birdPosY = height / 6
 birdRadius = 20
+birdWidth = 35
+birdHeight = 50
 time = 0
 
 points = 0
+gameOver = False
 
 # Pipe
 pipeWidth = 50
@@ -36,17 +40,31 @@ pipeOneUpperX = width / 2
 pipeOneUpperY = random.randint(-pipeHeight, 0)
 pipeOneLowerX = pipeOneUpperX
 pipeOneLowerY = pipeOneUpperY + pipeHeight + pipeGap
+pipeOnePointSet = False
 
 pipeTwoUpperX = width
 pipeTwoUpperY = random.randint(-pipeHeight, 0)
 pipeTwoLowerX = pipeTwoUpperX
 pipeTwoLowerY = pipeTwoUpperY + pipeHeight + pipeGap
+pipeTwoPointSet = False
 
 
 def print_text(text, pos, font_size, color):
     font = pg.font.SysFont(None, font_size)
     screen.blit(font.render(text, True, color), pos)
 
+
+'''Bild laden'''
+fb = pg.image.load("res/fb.png")
+fb = pg.transform.scale(fb, (birdWidth, birdHeight))
+base = pg.image.load("res/base.png")
+base = pg.transform.scale(screen, (width, height))
+bg = pg.image.load("res/background.png")
+bg = pg.transform.scale(screen, (width, height))
+pipeLow = pg.image.load("res/pipeLow.png")
+pipeLow = pg.transform.scale(screen, (0, 0))
+pipeUpper = pg.image.load("res/pipeUpp.png")
+pipeUpper = pg.transform.scale(screen, (0, 0))
 
 while True:
     ''' EVENTS '''
@@ -61,12 +79,14 @@ while True:
                 pass
 
     ''' HINTERGRUND '''
+    screen.blit(bg, (0, 0))
     screen.fill([111, 111, 111])
 
     '''Pipe'''
     pipeOneUpperX -= 10
     pipeOneLowerX = pipeOneUpperX
     if pipeOneUpperX < -pipeWidth:
+        pipeOnePointSet = False
         pipeOneUpperX = width
         pipeOneUpperY = random.randint(-pipeHeight, 0)
         pipeOneLowerY = pipeOneUpperY + pipeHeight + pipeGap
@@ -77,6 +97,7 @@ while True:
     pipeTwoUpperX -= 10
     pipeTwoLowerX = pipeTwoUpperX
     if pipeTwoUpperX < -pipeWidth:
+        pipeTwoPointSet = False
         pipeTwoUpperX = width
         pipeTwoUpperY = random.randint(-pipeHeight, 0)
         pipeTwoLowerY = pipeTwoUpperY + pipeHeight + pipeGap
@@ -86,19 +107,30 @@ while True:
 
     '''Collision Check'''
     # Pipe One
-    if (birdPosX == pipeOneUpperX and birdPosY < pipeOneUpperY + pipeHeight) or (
-            birdPosX == pipeOneLowerX and birdPosY > pipeOneLowerY - pipeHeight):
+    if ((pipeOneUpperX <= birdPosX + birdRadius and pipeOneUpperX + pipeWidth >= birdPosX - birdRadius)
+            and (pipeOneUpperY + pipeHeight >= birdPosY - birdRadius or pipeOneLowerY <= birdPosY + birdRadius)):
         print_text("Collision", (height / 2, width / 2), 30, (255, 255, 255))
+        gameOver = True
 
-    elif birdPosX > pipeOneUpperX:
-        points += 1
+    elif birdPosX > pipeOneUpperX + pipeWidth / 2:
+        if not pipeOnePointSet:
+            points += 1
+            pipeOnePointSet = True
 
     # Pipe Two
-    if (birdPosX == pipeTwoUpperX and birdPosY < pipeTwoUpperY + pipeHeight) or (
-            birdPosX == pipeTwoLowerX and birdPosY > pipeTwoLowerY - pipeHeight):
+    if ((pipeTwoUpperX <= birdPosX + birdRadius and pipeTwoUpperX + pipeWidth >= birdPosX - birdRadius)
+            and (pipeTwoUpperY + pipeHeight >= birdPosY - birdRadius or pipeOneLowerY <= birdPosY + birdRadius)):
         print_text("Collision", (height / 2, width / 2), 30, (255, 255, 255))
-    elif birdPosX > pipeTwoUpperX:
-        points += 1
+        gameOver = True
+
+    elif birdPosX > pipeTwoUpperX + pipeWidth / 2:
+        if not pipeTwoPointSet:
+            points += 1
+            pipeTwoPointSet = True
+
+    '''Game Over'''
+    if gameOver:
+        print_text("Game Over", (height / 2, width / 2), 50, (255, 255, 0))
 
     '''Bird'''
     pg.draw.circle(screen, [255, 255, 0], (birdPosX, birdPosY), radius=birdRadius)
@@ -111,4 +143,6 @@ while True:
 
     ''' ZEITEN '''
     FPSCLOCK.tick(FPS)
-    pg.display.update()
+    # TODO: change
+    if not gameOver:
+        pg.display.update()
