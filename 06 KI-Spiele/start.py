@@ -1,4 +1,4 @@
-""" Codeinfo """
+""" Code info """
 # Author: Julian Schumacher
 # Date: 22.01.2024
 # Version: 1.0
@@ -36,15 +36,13 @@ gameOver = False
 pipeWidth = 50
 pipeHeight = 500
 pipeGap = 200
-pipeOneUpperX = width / 2
+pipeOneX = width / 2
 pipeOneUpperY = random.randint(-pipeHeight, 0)
-pipeOneLowerX = pipeOneUpperX
 pipeOneLowerY = pipeOneUpperY + pipeHeight + pipeGap
 pipeOnePointSet = False
 
-pipeTwoUpperX = width
+pipeTwoX = width
 pipeTwoUpperY = random.randint(-pipeHeight, 0)
-pipeTwoLowerX = pipeTwoUpperX
 pipeTwoLowerY = pipeTwoUpperY + pipeHeight + pipeGap
 pipeTwoPointSet = False
 
@@ -58,13 +56,13 @@ def print_text(text, pos, font_size, color):
 fb = pg.image.load("res/fb.png")
 fb = pg.transform.scale(fb, (birdWidth, birdHeight))
 base = pg.image.load("res/base.png")
-base = pg.transform.scale(screen, (width, height))
+base = pg.transform.scale(base, (width, height))
 bg = pg.image.load("res/background.png")
-bg = pg.transform.scale(screen, (width, height))
+bg = pg.transform.scale(bg, (width, height))
 pipeLow = pg.image.load("res/pipeLow.png")
-pipeLow = pg.transform.scale(screen, (0, 0))
+pipeLow = pg.transform.scale(pipeLow, (0, 0))
 pipeUpper = pg.image.load("res/pipeUpp.png")
-pipeUpper = pg.transform.scale(screen, (0, 0))
+pipeUpper = pg.transform.scale(pipeUpper, (0, 0))
 
 while True:
     ''' EVENTS '''
@@ -80,53 +78,54 @@ while True:
 
     ''' HINTERGRUND '''
     screen.blit(bg, (0, 0))
-    screen.fill([111, 111, 111])
 
     '''Pipe'''
-    pipeOneUpperX -= 10
-    pipeOneLowerX = pipeOneUpperX
-    if pipeOneUpperX < -pipeWidth:
+    pipeOneX -= 10
+    if pipeOneX < -pipeWidth:
         pipeOnePointSet = False
-        pipeOneUpperX = width
+        pipeOneX = width
         pipeOneUpperY = random.randint(-pipeHeight, 0)
         pipeOneLowerY = pipeOneUpperY + pipeHeight + pipeGap
-        pipeOneLowerX = pipeOneUpperX
-    pg.draw.rect(screen, [255, 0, 0], [pipeOneUpperX, pipeOneUpperY, pipeWidth, pipeHeight])
-    pg.draw.rect(screen, [255, 0, 0], [pipeOneLowerX, pipeOneLowerY, pipeWidth, pipeHeight])
+    pg.draw.rect(screen, [255, 0, 0], [pipeOneX, pipeOneUpperY, pipeWidth, pipeHeight])
+    pg.draw.rect(screen, [0, 255, 0], [pipeOneX, pipeOneLowerY, pipeWidth, pipeHeight])
 
-    pipeTwoUpperX -= 10
-    pipeTwoLowerX = pipeTwoUpperX
-    if pipeTwoUpperX < -pipeWidth:
+    pipeTwoX -= 10
+    if pipeTwoX < -pipeWidth:
         pipeTwoPointSet = False
-        pipeTwoUpperX = width
+        pipeTwoX = width
         pipeTwoUpperY = random.randint(-pipeHeight, 0)
         pipeTwoLowerY = pipeTwoUpperY + pipeHeight + pipeGap
-        pipeTwoLowerX = pipeTwoUpperX
-    pg.draw.rect(screen, [255, 0, 0], [pipeTwoUpperX, pipeTwoUpperY, pipeWidth, pipeHeight])
-    pg.draw.rect(screen, [255, 0, 0], [pipeTwoLowerX, pipeTwoLowerY, pipeWidth, pipeHeight])
+    pg.draw.rect(screen, [255, 0, 0], [pipeTwoX, pipeTwoUpperY, pipeWidth, pipeHeight])
+    pg.draw.rect(screen, [0, 255, 0], [pipeTwoX, pipeTwoLowerY, pipeWidth, pipeHeight])
 
     '''Collision Check'''
     # Pipe One
-    if ((pipeOneUpperX <= birdPosX + birdRadius and pipeOneUpperX + pipeWidth >= birdPosX - birdRadius)
-            and (pipeOneUpperY + pipeHeight >= birdPosY - birdRadius or pipeOneLowerY <= birdPosY + birdRadius)):
+    if ((pipeOneX <= birdPosX + birdRadius and pipeOneX + pipeWidth >= birdPosX - birdRadius)
+            and (birdPosY - birdRadius <= pipeOneUpperY + pipeHeight or birdPosY + birdRadius >= pipeOneLowerY)):
         print_text("Collision", (height / 2, width / 2), 30, (255, 255, 255))
         gameOver = True
-
-    elif birdPosX > pipeOneUpperX + pipeWidth / 2:
+        print(f"birdPos: ({birdPosX},{birdPosY}), birdRadius: {birdRadius}")
+        print(f"pipeOne: ({pipeOneX},{pipeOneUpperY},{pipeOneLowerY}), pipeWidth: {pipeWidth}")
+    elif birdPosX - birdRadius > pipeOneX + pipeWidth:
         if not pipeOnePointSet:
             points += 1
             pipeOnePointSet = True
 
     # Pipe Two
-    if ((pipeTwoUpperX <= birdPosX + birdRadius and pipeTwoUpperX + pipeWidth >= birdPosX - birdRadius)
-            and (pipeTwoUpperY + pipeHeight >= birdPosY - birdRadius or pipeOneLowerY <= birdPosY + birdRadius)):
+    if ((pipeTwoX <= birdPosX + birdRadius and pipeTwoX + pipeWidth >= birdPosX - birdRadius)
+            and (birdPosY - birdRadius <= pipeTwoUpperY + pipeHeight or birdPosY + birdRadius >= pipeTwoLowerY)):
         print_text("Collision", (height / 2, width / 2), 30, (255, 255, 255))
         gameOver = True
-
-    elif birdPosX > pipeTwoUpperX + pipeWidth / 2:
+        print(f"birdPos: ({birdPosX},{birdPosY}), birdRadius: {birdRadius}")
+        print(f"pipeTwo: ({pipeTwoX},{pipeTwoUpperY},{pipeTwoLowerY}), pipeWidth: {pipeWidth}")
+    elif birdPosX - birdRadius > pipeTwoX + pipeWidth:
         if not pipeTwoPointSet:
             points += 1
             pipeTwoPointSet = True
+
+    # Ceiling and floor
+    # if (birdPosY + birdRadius > height or birdPosY - birdRadius < 0):
+    #   gameOver = True
 
     '''Game Over'''
     if gameOver:
